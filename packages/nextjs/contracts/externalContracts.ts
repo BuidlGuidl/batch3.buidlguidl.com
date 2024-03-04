@@ -14,7 +14,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const externalContracts = {
   10: {
     BatchRegistry: {
-      address: "0x0A7d97d392e7400D15460ae0C9799951a3719393",
+      address: "0x9386d925B1e18D231565222Bc14277f8B7f7FcF5",
       abi: [
         {
           inputs: [
@@ -192,6 +192,13 @@ const externalContracts = {
             },
           ],
           name: "updateAllowList",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "withdraw",
           outputs: [],
           stateMutability: "nonpayable",
           type: "function",

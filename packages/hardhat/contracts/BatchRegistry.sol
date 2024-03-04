@@ -61,5 +61,11 @@ contract BatchRegistry is Ownable {
 		emit CheckedIn(wasFirstTime, tx.origin, msg.sender);
 	}
 
+	// Withdraw function for admins in case some builders don't end up checking in
+	function withdraw() public onlyOwner {
+		(bool success, ) = payable(owner()).call{value: address(this).balance}("");
+		require(success, "Failed to withdraw");
+	}
+
 	receive() external payable {}
 }

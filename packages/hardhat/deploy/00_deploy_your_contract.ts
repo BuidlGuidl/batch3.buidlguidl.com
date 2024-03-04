@@ -34,7 +34,7 @@ const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEn
 
   // Get the deployed contract to interact with it after deploying.
   const batchRegistry = await hre.ethers.getContract<Contract>("BatchRegistry", deployer);
-  console.log("BatchRegistry deployed to:", batchRegistry.address);
+  console.log("BatchRegistry deployed to:", await batchRegistry.getAddress());
 };
 
 export default deployYourContract;
