@@ -10,9 +10,7 @@ const AhmedBIO: NextPage = () => {
       </div>
 
       <div className="my-8">
-        <h2 text-xl font-semibold>
-          Bio
-        </h2>
+        <h2 className="text-xl font-semibold">Bio</h2>
         <p className="text-base">
           Born in Libya, north Africa, raised in the united Kingdom Manchester. Graduated from Economics. Started
           learning how to code 18 months ago. Submitted a project to the constellation hackathon called Chainrunners
@@ -24,10 +22,8 @@ const AhmedBIO: NextPage = () => {
       </div>
 
       <div className="my-8">
-        <h2 text-xl font-semibold>
-          Socials
-        </h2>
-        <div className=" mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+        <h2 className="text-xl font-semibold">Socials</h2>
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
           <a
             href="https://github.com/AhmedBorwin"
             className="text-blue-600 hover:text-blue-800"
