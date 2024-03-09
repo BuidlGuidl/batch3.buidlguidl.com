@@ -1,14 +1,26 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { NextPage } from "next";
 import { BugAntIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { Address } from "~~/components/scaffold-eth";
 import { useScaffoldContractRead } from "~~/hooks/scaffold-eth";
+import { useScaffoldEventHistory } from "~~/hooks/scaffold-eth";
 
 const Home: NextPage = () => {
+  const [checkedInBuilders, setCheckedInBuilders] = useState<string[]>([]);
+
+  //HOOKS
   const { isLoading, data: checkedInCounter } = useScaffoldContractRead({
     contractName: "BatchRegistry",
     functionName: "checkedInCounter",
+  });
+  //event history
+  const { isLoading: isReadingEventLoading, data: eventHistory } = useScaffoldEventHistory({
+    contractName: "BatchRegistry",
+    eventName: "CheckedIn",
+    fromBlock: 116978463n,
   });
 
   function checkedInCounterElement() {
@@ -18,6 +30,25 @@ const Home: NextPage = () => {
       return <span className="loading loading-dots loading-xs"></span>;
     }
   }
+
+  function formatAddress(address: string) {
+    if (!address) {
+      return "Resolving...";
+    }
+    return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+  }
+
+  useEffect(() => {
+    if (!isReadingEventLoading && eventHistory) {
+      const currentBuildersSet = new Set(checkedInBuilders);
+      const builders = eventHistory
+        .map(e => e.args.builder)
+        .filter(builder => builder !== undefined && !currentBuildersSet.has(builder)) as string[];
+      if (builders.length > 0) {
+        setCheckedInBuilders(currentBuilders => [...currentBuilders, ...builders]);
+      }
+    }
+  }, [isReadingEventLoading, eventHistory, checkedInBuilders]);
 
   return (
     <>
@@ -32,6 +63,39 @@ const Home: NextPage = () => {
             <span className="font-bold">Checked in builders count:</span>
             <span>{checkedInCounterElement()}</span>
           </p>
+          <div className="flex flex-col text-center text-md">
+            <span className="font-extrabold text-lg">List of Builers</span>
+            <div>
+              {" "}
+              {isReadingEventLoading ? (
+                <span className="loading loading-dots loading-xs"></span>
+              ) : (
+                <table className="table-auto mt-4">
+                  <thead className=" border-b-2">
+                    <tr>
+                      <th>Address</th>
+                      <th>ENS</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {checkedInBuilders.map((builder, index) => (
+                      <tr key={index}>
+                        <td className="border p-2">
+                          <span className="hidden sm:inline">{builder}</span>
+                          <span className="inline sm:hidden">{formatAddress(builder)}</span>
+                        </td>
+                        <td className="border p-2">
+                          <span>
+                            <Address address={builder} />
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}{" "}
+            </div>
+          </div>
         </div>
 
         <div className="flex-grow bg-base-300 w-full mt-16 px-8 py-12">
