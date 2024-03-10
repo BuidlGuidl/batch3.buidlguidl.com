@@ -68,6 +68,10 @@ const Home: NextPage = () => {
     }
   }, [chain]);
 
+  useEffect(() => {
+    setIsConnectedOptimism(false);
+  }, []);
+
   return (
     <>
       <div className="flex items-center flex-col flex-grow pt-10">
