@@ -3,24 +3,32 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { NextPage } from "next";
+import { usePublicClient } from "wagmi";
 import { BugAntIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { Address } from "~~/components/scaffold-eth";
-import { useScaffoldContractRead } from "~~/hooks/scaffold-eth";
-import { useScaffoldEventHistory } from "~~/hooks/scaffold-eth";
+import { useScaffoldContractRead, useScaffoldEventHistory } from "~~/hooks/scaffold-eth";
 
 const Home: NextPage = () => {
   const [checkedInBuilders, setCheckedInBuilders] = useState<string[]>([]);
+  const [isConnectedOptimism, setIsConnectedOptimism] = useState<boolean>(false);
 
   //HOOKS
+
+  const { chain } = usePublicClient();
+
+  //Get tally of Checkedin Builders
   const { isLoading, data: checkedInCounter } = useScaffoldContractRead({
     contractName: "BatchRegistry",
     functionName: "checkedInCounter",
   });
+
   //event history
   const { isLoading: isReadingEventLoading, data: eventHistory } = useScaffoldEventHistory({
     contractName: "BatchRegistry",
     eventName: "CheckedIn",
     fromBlock: 116978463n,
+    watch: true,
+    enabled: isConnectedOptimism,
   });
 
   function checkedInCounterElement() {
@@ -31,15 +39,18 @@ const Home: NextPage = () => {
     }
   }
 
+  //format address for smaller screen size
   function formatAddress(address: string) {
     if (!address) {
       return "Resolving...";
     }
-    return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+    return `${address.substring(0, 5)}...${address.substring(address.length - 4)}`;
   }
 
+  //creates a list of checked in builders addresses from the event history of the contract
+  //uses Set to make sure there are no duplicated on re-render
   useEffect(() => {
-    if (!isReadingEventLoading && eventHistory) {
+    if (!isReadingEventLoading && eventHistory && isConnectedOptimism) {
       const currentBuildersSet = new Set(checkedInBuilders);
       const builders = eventHistory
         .map(e => e.args.builder)
@@ -48,7 +59,14 @@ const Home: NextPage = () => {
         setCheckedInBuilders(currentBuilders => [...currentBuilders, ...builders]);
       }
     }
-  }, [isReadingEventLoading, eventHistory, checkedInBuilders]);
+  }, [isReadingEventLoading, eventHistory, checkedInBuilders, isConnectedOptimism]);
+
+  //get chain ID and check if connected to optimism
+  useEffect(() => {
+    if (chain.id === 10) {
+      setIsConnectedOptimism(true);
+    }
+  }, [chain]);
 
   return (
     <>
@@ -64,36 +82,41 @@ const Home: NextPage = () => {
             <span>{checkedInCounterElement()}</span>
           </p>
           <div className="flex flex-col text-center text-md">
-            <span className="font-extrabold text-lg">List of Builers</span>
             <div>
-              {" "}
-              {isReadingEventLoading ? (
-                <span className="loading loading-dots loading-xs"></span>
+              {!isConnectedOptimism ? (
+                <div className="mt-4 text-xl font-bold"> Please Connect to Optimism To Read List of Builders </div>
               ) : (
-                <table className="table-auto mt-4">
-                  <thead className=" border-b-2">
-                    <tr>
-                      <th>Address</th>
-                      <th>ENS</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {checkedInBuilders.map((builder, index) => (
-                      <tr key={index}>
-                        <td className="border p-2">
-                          <span className="hidden sm:inline">{builder}</span>
-                          <span className="inline sm:hidden">{formatAddress(builder)}</span>
-                        </td>
-                        <td className="border p-2">
-                          <span>
-                            <Address address={builder} />
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}{" "}
+                <>
+                  <span className="font-extrabold text-lg">List of Builers</span>
+                  {isReadingEventLoading ? (
+                    <span className="loading loading-dots loading-xs"></span>
+                  ) : (
+                    <table className="table-auto mt-4">
+                      <thead className=" border-b-2">
+                        <tr>
+                          <th>Address</th>
+                          <th>ENS</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {checkedInBuilders.map((builder, index) => (
+                          <tr key={index}>
+                            <td className="border p-2">
+                              <span className="hidden sm:inline">{builder}</span>
+                              <span className="inline sm:hidden">{formatAddress(builder)}</span>
+                            </td>
+                            <td className="border p-2">
+                              <span>
+                                <Address address={builder} />
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </>
+              )}
             </div>
           </div>
         </div>
