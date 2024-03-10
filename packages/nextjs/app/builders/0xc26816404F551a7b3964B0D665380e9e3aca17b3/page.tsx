@@ -2,9 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { GithubIcon, LinkedInIcon, MailIcon, MapMarkerIcon, XIcon } from "./svgs";
 import { blo } from "blo";
 import { useEnsAvatar, useEnsName } from "wagmi";
+import { GithubIcon, LinkedInIcon, MailIcon, MapMarkerIcon, XIcon } from "~~/components/svgs";
 
 export default function BatchPage() {
   const address = "0xc26816404F551a7b3964B0D665380e9e3aca17b3";
