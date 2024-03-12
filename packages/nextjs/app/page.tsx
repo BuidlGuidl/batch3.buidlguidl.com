@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { NextPage } from "next";
 import { BugAntIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { WalletInfo } from "~~/components/WalletInfo";
 import { useScaffoldContractRead } from "~~/hooks/scaffold-eth";
 
 const Home: NextPage = () => {
@@ -31,6 +32,9 @@ const Home: NextPage = () => {
           <p className="text-lg flex gap-2 justify-center">
             <span className="font-bold">Checked in builders count:</span>
             <span>{checkedInCounterElement()}</span>
+          </p>
+          <p className="text-center text-lg">
+            <WalletInfo />
           </p>
         </div>
 
