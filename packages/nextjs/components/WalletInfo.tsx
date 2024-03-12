@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useAccount, useEnsName } from "wagmi";
 import { useScaffoldContractRead } from "~~/hooks/scaffold-eth";
 
-export default function WalletInfo() {
+export const WalletInfo = () => {
   const { address } = useAccount();
 
   const { data: ens } = useEnsName({
@@ -71,4 +71,4 @@ export default function WalletInfo() {
         are awaiting you.{" "}
       </span>
     );
-}
+};
