@@ -4,12 +4,21 @@ import Link from "next/link";
 import type { NextPage } from "next";
 import { BugAntIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { WalletInfo } from "~~/components/WalletInfo";
-import { useScaffoldContractRead } from "~~/hooks/scaffold-eth";
+import { Address } from "~~/components/scaffold-eth";
+import { useScaffoldContractRead, useScaffoldEventHistory } from "~~/hooks/scaffold-eth";
 
 const Home: NextPage = () => {
+  //Get tally of Checkedin Builders
   const { isLoading, data: checkedInCounter } = useScaffoldContractRead({
     contractName: "BatchRegistry",
     functionName: "checkedInCounter",
+  });
+
+  //event history
+  const { isLoading: isReadingEventLoading, data: eventHistory } = useScaffoldEventHistory({
+    contractName: "BatchRegistry",
+    eventName: "CheckedIn",
+    fromBlock: 116978463n,
   });
 
   function checkedInCounterElement() {
@@ -19,6 +28,10 @@ const Home: NextPage = () => {
       return <span className="loading loading-dots loading-xs"></span>;
     }
   }
+
+  //creates a list of checked in builders addresses from the event history of the contract
+  const buildersSet = new Set(eventHistory?.map(e => e.args.builder).filter(Boolean));
+  const checkedInBuilders = Array.from(buildersSet);
 
   return (
     <>
@@ -36,6 +49,48 @@ const Home: NextPage = () => {
           <p className="text-center text-lg">
             <WalletInfo />
           </p>
+          <div className="flex flex-col text-center items-center text-md">
+            <div>
+              <span className="font-extrabold text-lg">List of Builers</span>
+              {isReadingEventLoading || !eventHistory?.length ? (
+                <span className="loading loading-dots loading-xs"></span>
+              ) : (
+                <table className="table-auto mt-4">
+                  <thead className=" border-b-2">
+                    <tr>
+                      <th>Address</th>
+                      <th>ENS</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {checkedInBuilders.map((builder, index) => (
+                      <tr key={index}>
+                        <td className="border p-2">
+                          <div className="relative flex flex-col items-center group">
+                            <Link href={`builders/${builder}`}>
+                              {builder ? builder?.slice(0, 5) + "..." + builder?.slice(-4) : "Address not found"}
+                            </Link>
+
+                            <div className="absolute bottom-0 flex-col items-center hidden mb-6 group-hover:flex">
+                              <span className="relative z-10 p-2 text-xs leading-none text-white whitespace-no-wrap bg-black shadow-lg rounded-md">
+                                Click here to visit Builders Homepage
+                              </span>
+                              <div className="w-3 h-3 -mt-2 rotate-45 bg-black"></div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="border p-2">
+                          <span>
+                            <Address address={builder} />
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
         </div>
 
         <div className="flex-grow bg-base-300 w-full mt-16 px-8 py-12">
