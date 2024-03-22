@@ -30,3 +30,11 @@ p {
 .btn.btn-ghost {
   @apply shadow-none;
 }
+.bg-image {
+  background-image: url("/ethereum.png");
+  background-size: cover;
+  background-position: center;
+}
+.bg-visibility-color {
+  background-color: rgb(0 0 0 / 25%);
+}
